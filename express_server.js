@@ -62,9 +62,16 @@ app.post("/urls", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// delete is impremented
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
+app.post("/urls/:id", (req, res) => {
+  const id = req.params.id;
+  urlDatabase[id] = req.body.longURL;
   res.redirect("/urls");
 });
 
