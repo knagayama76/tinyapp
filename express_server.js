@@ -13,18 +13,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-// app.get("/", (req, res) => {
-//   res.send("Hello!!!!");
-// });
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
+// Generate alphanumeric string for shortURL
 const generateRandomString = (n) => {
   let randomString = "";
   let characters =
@@ -71,6 +60,12 @@ app.post("/urls", (req, res) => {
     longURL,
   };
   res.render("urls_show", templateVars);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
