@@ -123,7 +123,7 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-// register new user and store user data into the obj
+// register a new user
 app.post("/register", (req, res) => {
   const id = generateRandomString(6);
   const email = req.body.email;
@@ -148,6 +148,16 @@ app.post("/register", (req, res) => {
   res.cookie("user_id", id);
   res.redirect("/urls");
 });
+
+// new login page
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]],
+  };
+  res.render("login", templateVars);
+});
+
+// app.post("/login", (req, res) => {});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
