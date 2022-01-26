@@ -1,4 +1,13 @@
 <header>
+  <style>
+    .input {
+      border: none;
+      height: 38px;
+      width: 200px;
+      border-radius: 0.25rem;
+      margin-right: 5px;
+    }
+  </style>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
     <button
@@ -17,6 +26,18 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+    </div>
+    <div>
+      <form method="POST" action="/login">
+        <input
+          class="input"
+          type="text"
+          name="username"
+          placeholder="username"
+          required
+        />
+        <button type="submit" class="btn btn-outline-dark">Login</button>
+      </form>
     </div>
   </nav>
 </header>
