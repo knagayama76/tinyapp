@@ -129,6 +129,17 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  if (!email || !password) {
+    return res.status(400).send("e-mail and password can not be blank!");
+  }
+
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === email) {
+      return res.status(400).send("This e-mail has been registered.");
+    }
+  }
+
   users[id] = {
     id,
     email,
