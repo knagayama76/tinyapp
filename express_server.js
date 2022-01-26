@@ -10,12 +10,27 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
+// Simulate database /////////////////////////////////
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
 
-// Generate alphanumeric string for shortURL
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+//////////////////////////////////////////////////////
+
+// Generate alphanumeric string //////////////////////
 const generateRandomString = (n) => {
   let randomString = "";
   let characters =
@@ -26,10 +41,11 @@ const generateRandomString = (n) => {
   }
   return randomString;
 };
+//////////////////////////////////////////////////////
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     urls: urlDatabase,
   };
   res.render("urls_index", templateVars);
@@ -37,14 +53,14 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
@@ -85,17 +101,40 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-// delete is impremented
+// delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
-// edit the url
+// edit
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   urlDatabase[id] = req.body.longURL;
+  res.redirect("/urls");
+});
+
+// render user registration page
+app.get("/register", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]],
+  };
+  res.render("register", templateVars);
+});
+
+// register new user and store user data into the obj
+app.post("/register", (req, res) => {
+  const id = generateRandomString(6);
+  const email = req.body.email;
+  const password = req.body.password;
+
+  users[id] = {
+    id,
+    email,
+    password,
+  };
+  res.cookie("user_id", id);
   res.redirect("/urls");
 });
 
