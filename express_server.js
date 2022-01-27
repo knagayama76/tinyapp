@@ -5,6 +5,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -60,11 +62,11 @@ const generateRandomString = (n) => {
 // Helper function for getting individual user from database
 const gettingAUser = function (email) {
   for (const user in users) {
-    if (email === users[user].email) {
-      return users[user];
+    if (!email === users[user].email) {
+      return null;
     }
+    return users[user];
   }
-  return null;
 };
 
 // Create a function named urlsForUser(id) which returns the URLs where the userID is equal to the id of the currently logged-in user.
@@ -168,9 +170,9 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const id = generateRandomString(6);
   const email = req.body.email;
-  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
-  if (!email || !password) {
+  if (!email || !hashedPassword) {
     return res.status(400).send("e-mail and password can not be blank!");
   }
 
@@ -182,7 +184,7 @@ app.post("/register", (req, res) => {
   users[id] = {
     id,
     email,
-    password,
+    hashedPassword,
   };
   res.cookie("user_id", id);
   res.redirect("/urls");
@@ -198,9 +200,9 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
-  if (!email || !password) {
+  if (!email || !hashedPassword) {
     return res.status(400).send("e-mail and password can not be blank!");
   }
 
@@ -209,7 +211,7 @@ app.post("/login", (req, res) => {
     return res.status(430).send("e-mail not found");
   }
   console.log(user);
-  if (user && user.password !== password) {
+  if (user && bcrypt.compareSync(user.password, hashedPassword)) {
     return res.status(430).send("Password doesn't match");
   }
 
