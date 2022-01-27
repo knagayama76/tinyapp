@@ -152,7 +152,6 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  console.log(email, password);
 
   if (!email || !password) {
     return res.status(400).send("e-mail and password can not be blank!");
