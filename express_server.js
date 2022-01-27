@@ -90,8 +90,15 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]],
   };
+
+  if (!users[req.cookies["user_id"]]) {
+    return res.redirect("/urls");
+  }
+
   res.render("urls_new", templateVars);
 });
+
+// If someone is not logged in when trying to access /urls/new , redirect them to the login page. Ensure that a none logged in user cannot add a new url with a POST request to /urls. The app should return a relevant error message instead. To test your post request, enter the following terminal command.
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
@@ -103,6 +110,9 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.status(400).send("Bad request");
+  }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
