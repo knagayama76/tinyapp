@@ -25,13 +25,17 @@ const urlDatabase = {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
   },
+  i3vcd3: {
+    longURL: "https://www.google.ca",
+    userID: "user2RandomID",
+  },
 };
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+  aJ48lW: {
+    id: "aJ48lW",
+    email: "use@ex.com",
+    password: "1234",
   },
   user2RandomID: {
     id: "user2RandomID",
@@ -54,24 +58,43 @@ const generateRandomString = (n) => {
 };
 
 // Helper function for getting individual user from database
-const gettingAUser = function (obj) {
-  for (const el in obj) {
-    return obj[el];
+const gettingAUser = function (email) {
+  for (const user in users) {
+    if (email === users[user].email) {
+      return users[user];
+    }
   }
+  return null;
 };
+
+// Create a function named urlsForUser(id) which returns the URLs where the userID is equal to the id of the currently logged-in user.
+const urlsForUser = function (id) {
+  const result = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      // urlDatabase[shortURL].longURL;
+      result[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return result;
+};
+
 //////////////////////////////////////////////////////
 
+// render homepage
 app.get("/urls", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    return res.redirect("/login");
+  }
+
   const templateVars = {
+    urls: urlsForUser(req.cookies["user_id"]),
     user: users[req.cookies["user_id"]],
-    urls: urlDatabase,
   };
-  console.log(templateVars);
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  // console.log(req.body); // Log the POST request body to the console
   const { longURL } = req.body;
   const shortURL = generateRandomString(6);
   // console.log(shortURL, longURL);
@@ -92,13 +115,11 @@ app.get("/urls/new", (req, res) => {
   };
 
   if (!users[req.cookies["user_id"]]) {
-    return res.redirect("/urls");
+    return res.redirect("/login");
   }
 
   res.render("urls_new", templateVars);
 });
-
-// If someone is not logged in when trying to access /urls/new , redirect them to the login page. Ensure that a none logged in user cannot add a new url with a POST request to /urls. The app should return a relevant error message instead. To test your post request, enter the following terminal command.
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
@@ -120,14 +141,18 @@ app.get("/u/:shortURL", (req, res) => {
 // delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+  if (req.cookies["user_id"] === urlDatabase[shortURL].userID) {
+    delete urlDatabase[shortURL];
+  }
   res.redirect("/urls");
 });
 
 // edit
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  urlDatabase[id].longURL = req.body.longURL;
+  if (req.cookies["user_id"] === id) {
+    urlDatabase[id].longURL = req.body.longURL;
+  }
   res.redirect("/urls");
 });
 
@@ -179,12 +204,12 @@ app.post("/login", (req, res) => {
     return res.status(400).send("e-mail and password can not be blank!");
   }
 
-  const user = gettingAUser(users);
-  if (user.email !== email) {
+  const user = gettingAUser(email);
+  if (!user) {
     return res.status(430).send("e-mail not found");
   }
-
-  if (user.email === email && user.password !== password) {
+  console.log(user);
+  if (user && user.password !== password) {
     return res.status(430).send("Password doesn't match");
   }
 
