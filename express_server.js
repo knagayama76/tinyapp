@@ -41,6 +41,13 @@ const generateRandomString = (n) => {
   }
   return randomString;
 };
+
+// Helper function for getting individual user from database
+const gettingAUser = function (obj) {
+  for (const el in obj) {
+    return obj[el];
+  }
+};
 //////////////////////////////////////////////////////
 
 app.get("/urls", (req, res) => {
@@ -88,19 +95,6 @@ app.post("/urls", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// login/logout
-app.post("/login", (req, res) => {
-  // console.log(req.body);
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
-});
-
-app.post("/logout", (req, res) => {
-  // console.log(req.body);
-  res.clearCookie("username");
-  res.redirect("/urls");
-});
-
 // delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
@@ -133,11 +127,9 @@ app.post("/register", (req, res) => {
     return res.status(400).send("e-mail and password can not be blank!");
   }
 
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      return res.status(400).send("This e-mail has been registered.");
-    }
+  const user = gettingAUser(users);
+  if (user.email === email) {
+    return res.status(400).send("This e-mail has been registered.");
   }
 
   users[id] = {
@@ -149,7 +141,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-// new login page
+// LOGIN
 app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]],
@@ -157,7 +149,33 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-// app.post("/login", (req, res) => {});
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  console.log(email, password);
+
+  if (!email || !password) {
+    return res.status(400).send("e-mail and password can not be blank!");
+  }
+
+  const user = gettingAUser(users);
+  if (user.email !== email) {
+    return res.status(430).send("e-mail not found");
+  }
+
+  if (user.email === email && user.password !== password) {
+    return res.status(430).send("Password doesn't match");
+  }
+
+  res.cookie("user_id", user.id);
+  res.redirect("/urls");
+});
+
+// LOGOUT
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);

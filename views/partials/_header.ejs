@@ -39,14 +39,17 @@
       </div>
     </div>
 
+    <% if(!user) { %>
     <div class="navbar-nav">
       <a class="nav-item nav-link" href="/login">Login</a>
       <a class="nav-item nav-link" href="/register">Register</a>
 
+      <% } else { %>
       <form class="logout" method="POST" action="/logout">
-        <p class="username">Logged in As: !</p>
+        <p class="username">Logged in As: <%= user.email %>!</p>
         <button type="submit" class="btn btn-outline-dark">Logout</button>
       </form>
+      <% } %>
     </div>
   </nav>
 </header>
