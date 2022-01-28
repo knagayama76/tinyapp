@@ -67,8 +67,6 @@ const urlsForUser = function (id) {
   const result = {};
   for (const shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userID === id) {
-      // result.shortURL = shortURL;
-      // result.longURL = urlDatabase[shortURL].longURL;
       result[shortURL] = {
         longURL: urlDatabase[shortURL].longURL,
         userID: urlDatabase[shortURL].userID,
@@ -179,15 +177,17 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const id = generateRandomString(6);
   const email = req.body.email;
-  const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+  const password = req.body.password;
 
-  if (!email || !hashedPassword) {
+  if (!email || !password) {
     return res.status(400).send("e-mail and password can not be blank!");
   }
 
   if (getUserByEmail(email, users)) {
     return res.status(400).send("This e-mail has been registered.");
   }
+
+  const hashedPassword = bcrypt.hashSync(password, salt);
 
   users[id] = {
     id,
