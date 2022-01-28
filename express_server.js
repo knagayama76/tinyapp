@@ -210,7 +210,6 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(req.body.password, salt);
-  console.log("email:", email, "password:", hashedPassword);
 
   if (!email || !password) {
     return res.status(400).send("e-mail and password can not be blank!");
@@ -222,7 +221,6 @@ app.post("/login", (req, res) => {
   }
 
   if (bcrypt.compareSync(users[user].password, hashedPassword)) {
-    console.log(users[user].password);
     return res.status(430).send("Password doesn't match");
   }
 
